@@ -29,6 +29,7 @@ import com.cl.entity.view.YishengyuyueView;
 
 import com.cl.service.YishengyuyueService;
 import com.cl.service.TokenService;
+import com.cl.service.TongzhiSendService;
 import com.cl.utils.PageUtils;
 import com.cl.utils.R;
 import com.cl.utils.MPUtil;
@@ -47,6 +48,8 @@ import com.cl.utils.CommonUtil;
 public class YishengyuyueController {
     @Autowired
     private YishengyuyueService yishengyuyueService;
+    @Autowired
+    private TongzhiSendService tongzhiSendService;
 
 
 
@@ -149,6 +152,9 @@ public class YishengyuyueController {
     public R save(@RequestBody YishengyuyueEntity yishengyuyue, HttpServletRequest request){
     	//ValidatorUtils.validateEntity(yishengyuyue);
         yishengyuyueService.insert(yishengyuyue);
+        if("是".equals(yishengyuyue.getSfsh())) {
+            tongzhiSendService.sendAllNotifications(yishengyuyue);
+        }
         return R.ok();
     }
     
@@ -160,6 +166,9 @@ public class YishengyuyueController {
     public R add(@RequestBody YishengyuyueEntity yishengyuyue, HttpServletRequest request){
     	//ValidatorUtils.validateEntity(yishengyuyue);
         yishengyuyueService.insert(yishengyuyue);
+        if("是".equals(yishengyuyue.getSfsh())) {
+            tongzhiSendService.sendAllNotifications(yishengyuyue);
+        }
         return R.ok();
     }
 
@@ -190,6 +199,9 @@ public class YishengyuyueController {
             yishengyuyue.setSfsh(sfsh);
             yishengyuyue.setShhf(shhf);
             list.add(yishengyuyue);
+            if("是".equals(sfsh)) {
+                tongzhiSendService.sendAllNotifications(yishengyuyue);
+            }
         }
         yishengyuyueService.updateBatchById(list);
         return R.ok();
