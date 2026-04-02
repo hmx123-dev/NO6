@@ -28,8 +28,8 @@ import com.cl.entity.YishengyuyueEntity;
 import com.cl.entity.view.YishengyuyueView;
 
 import com.cl.service.YishengyuyueService;
+import com.cl.service.TongzhijiluService;
 import com.cl.service.TokenService;
-import com.cl.utils.PageUtils;
 import com.cl.utils.R;
 import com.cl.utils.MPUtil;
 import com.cl.utils.MapUtils;
@@ -47,8 +47,9 @@ import com.cl.utils.CommonUtil;
 public class YishengyuyueController {
     @Autowired
     private YishengyuyueService yishengyuyueService;
-
-
+    
+    @Autowired
+    private TongzhijiluService tongzhijiluService;
 
 
 
@@ -152,9 +153,6 @@ public class YishengyuyueController {
         return R.ok();
     }
     
-    /**
-     * 前端保存
-     */
     @SysLog("新增医生预约")
     @RequestMapping("/add")
     public R add(@RequestBody YishengyuyueEntity yishengyuyue, HttpServletRequest request){
@@ -166,9 +164,6 @@ public class YishengyuyueController {
 
 
     /**
-     * 修改
-     */
-    @RequestMapping("/update")
     @Transactional
     @SysLog("修改医生预约")
     public R update(@RequestBody YishengyuyueEntity yishengyuyue, HttpServletRequest request){
@@ -190,6 +185,16 @@ public class YishengyuyueController {
             yishengyuyue.setSfsh(sfsh);
             yishengyuyue.setShhf(shhf);
             list.add(yishengyuyue);
+            
+            // 如果审核通过，立即创建通知记录
+            if("是".equals(sfsh)) {
+                tongzhijiluService.createAppointmentNotifications(
+                    yishengyuyue.getYuyuebianhao(),
+                    yishengyuyue.getYishengzhanghao(),
+                    yishengyuyue.getZhanghao(),
+                    yishengyuyue.getYuyueshijian()
+                );
+            }
         }
         yishengyuyueService.updateBatchById(list);
         return R.ok();
@@ -199,9 +204,6 @@ public class YishengyuyueController {
     
 
     /**
-     * 删除
-     */
-    @RequestMapping("/delete")
     @SysLog("删除医生预约")
     public R delete(@RequestBody Long[] ids){
         yishengyuyueService.deleteBatchIds(Arrays.asList(ids));
